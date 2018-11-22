@@ -24,15 +24,18 @@ public class VolumeSetResourceAttributes {
 
     private String fstab;
 
+    private String uuids;
+
     @JsonCreator
     public VolumeSetResourceAttributes(@JsonProperty("availabilityZone") String availabilityZone, @JsonProperty("volumeSize") Integer volumeSize,
             @JsonProperty("volumeType") String volumeType, @JsonProperty("deleteOnTermination") Boolean deleteOnTermination,
-            @JsonProperty("fstab") String fstab, @JsonProperty("volumes") List<Volume> volumes) {
+            @JsonProperty("fstab") String fstab, @JsonProperty("uuids") String uuids, @JsonProperty("volumes") List<Volume> volumes) {
         this.availabilityZone = availabilityZone;
         this.volumeSize = volumeSize;
         this.volumeType = volumeType;
         this.deleteOnTermination = deleteOnTermination;
         this.fstab = fstab;
+        this.uuids = uuids;
         this.volumes = volumes;
     }
 
@@ -84,25 +87,25 @@ public class VolumeSetResourceAttributes {
         this.fstab = fstab;
     }
 
+    public void setUuids(String uuids) {
+        this.uuids = uuids;
+    }
+
+    public String getUuids() {
+        return uuids;
+    }
+
     @JsonAutoDetect(fieldVisibility = ANY, getterVisibility = NONE, setterVisibility = NONE)
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Volume {
 
         private String id;
 
-        private String mounthPath;
-
-        private String uuid;
-
-        private String fstab;
-
         private String device;
 
-        public Volume(@JsonProperty("id") String id, @JsonProperty("mounthPath") String mounthPath, @JsonProperty("uuid") String uuid,
+        public Volume(@JsonProperty("id") String id,
                 @JsonProperty("device") String device) {
             this.id = id;
-            this.mounthPath = mounthPath;
-            this.uuid = uuid;
             this.device = device;
         }
 
@@ -112,30 +115,6 @@ public class VolumeSetResourceAttributes {
 
         public void setId(String id) {
             this.id = id;
-        }
-
-        public String getMounthPath() {
-            return mounthPath;
-        }
-
-        public void setMounthPath(String mountPath) {
-            this.mounthPath = mountPath;
-        }
-
-        public String getUuid() {
-            return uuid;
-        }
-
-        public void setUuid(String uuid) {
-            this.uuid = uuid;
-        }
-
-        public String getFstab() {
-            return fstab;
-        }
-
-        public void setFstab(String fstab) {
-            this.fstab = fstab;
         }
 
         public String getDevice() {

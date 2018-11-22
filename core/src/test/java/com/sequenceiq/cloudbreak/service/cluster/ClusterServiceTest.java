@@ -155,18 +155,18 @@ public class ClusterServiceTest {
 
         Resource volumeSet = new Resource();
         VolumeSetResourceAttributes attributes = new VolumeSetResourceAttributes("eu-west-1", 100, "standard",
-                null, "", List.of());
+                null, "", "", List.of());
         attributes.setDeleteOnTermination(null);
         volumeSet.setAttributes(new Json(attributes));
-        when(resourceRepository.findAllByStackIdAndInstanceIdAndType(eq(1L), eq("instanceId1"), eq(ResourceType.AWS_VOLUMESET))).thenReturn(List.of(volumeSet));
+        when(resourceRepository.findByStackIdAndInstanceIdAndType(eq(1L), eq("instanceId1"), eq(ResourceType.AWS_VOLUMESET))).thenReturn(volumeSet);
 
         clusterService.repairCluster(1L, List.of("instanceId1"), false, false);
         verify(stack).getInstanceMetaDataAsList();
-        verify(resourceRepository).findAllByStackIdAndInstanceIdAndType(eq(1L), eq("instanceId1"), eq(ResourceType.AWS_VOLUMESET));
+        verify(resourceRepository).findByStackIdAndInstanceIdAndType(eq(1L), eq("instanceId1"), eq(ResourceType.AWS_VOLUMESET));
         @SuppressWarnings("unchecked")
-        ArgumentCaptor<List<Resource>> saveCaptor = ArgumentCaptor.forClass(List.class);
-        verify(resourceRepository).saveAll(saveCaptor.capture());
-        assertFalse(saveCaptor.getValue().get(0).getAttributes().get(VolumeSetResourceAttributes.class).getDeleteOnTermination());
+        ArgumentCaptor<Resource> saveCaptor = ArgumentCaptor.forClass(Resource.class);
+        verify(resourceRepository).save(saveCaptor.capture());
+        assertFalse(saveCaptor.getValue().getAttributes().get(VolumeSetResourceAttributes.class).getDeleteOnTermination());
         verify(flowManager).triggerClusterRepairFlow(eq(1L), eq(Map.of("hostGroup1", List.of("host1Name.healthy"))), eq(false));
     }
 }

@@ -86,6 +86,7 @@ import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
+import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
@@ -135,6 +136,8 @@ public class ClusterService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterService.class);
 
     private static final String MASTER_CATEGORY = "MASTER";
+
+    private static final List<String> REATTACH_NOT_SUPPORTED_VOLUME_TYPES = List.of("ephemeral");
 
     @Inject
     private StackService stackService;
@@ -541,7 +544,7 @@ public class ClusterService {
                     }
                     HostGroup hostGroup = hostMetadata.getHostGroup();
                     if (hostGroup.getRecoveryMode() == RecoveryMode.AUTO) {
-                        validateRepair(stack, hostMetadata);
+                        validateRepair(stack, hostMetadata, false);
                     }
                     String hostGroupName = hostGroup.getName();
                     if (hostGroup.getRecoveryMode() == RecoveryMode.AUTO) {
@@ -602,6 +605,8 @@ public class ClusterService {
         try {
             transactionService.required(() -> {
                 Stack inTransactionStack = stackService.get(stackId);
+                boolean repairWithReattach = !deleteVolumes;
+                checkReattachSupportedOnProvider(inTransactionStack, repairWithReattach);
                 Cluster cluster = inTransactionStack.getCluster();
                 Set<String> instanceHostNames = getInstanceHostNames(hostGroupMode, inTransactionStack, nodeIds);
                 Set<HostGroup> hostGroups = hostGroupService.getByCluster(cluster.getId());
@@ -610,7 +615,8 @@ public class ClusterService {
                     if (hg.getRecoveryMode() == RecoveryMode.MANUAL && (!hostGroupMode || repairedHostGroups.contains(hg.getName()))) {
                         for (HostMetadata hmd : hg.getHostMetadata()) {
                             if (isRepairNeededForHost(hostGroupMode, instanceHostNames, hmd)) {
-                                validateRepair(inTransactionStack, hmd);
+                                checkDiskTypeSupported(inTransactionStack, repairWithReattach, hg);
+                                validateRepair(inTransactionStack, hmd, repairWithReattach);
                                 hostGroupToNodesMap.putIfAbsent(hg.getName(), nodesToRepair);
                                 nodesToRepair.add(hmd.getHostName());
                             }
@@ -627,6 +633,23 @@ public class ClusterService {
         }
         List<String> repairedEntities = CollectionUtils.isEmpty(repairedHostGroups) ? nodeIds : repairedHostGroups;
         triggerRepair(stackId, hostGroupToNodesMap, removeOnly, repairedEntities);
+    }
+
+    private void checkReattachSupportedOnProvider(Stack inTransactionStack, boolean repairWithReattach) {
+        if (repairWithReattach && !"AWS".equalsIgnoreCase(inTransactionStack.getPlatformVariant())) {
+            throw new BadRequestException("Volume reattach currently only supported on AWS.");
+        }
+    }
+
+    private void checkDiskTypeSupported(Stack inTransactionStack, boolean repairWithReattach, HostGroup hg) {
+        if (repairWithReattach
+                && inTransactionStack.getInstanceGroupsAsList().stream()
+                    .filter(instanceGroup -> hg.getName().equalsIgnoreCase(instanceGroup.getGroupName()))
+                    .map(InstanceGroup::getTemplate)
+                    .map(Template::getVolumeType)
+                    .anyMatch(REATTACH_NOT_SUPPORTED_VOLUME_TYPES::contains)) {
+            throw new BadRequestException("Reattach not supported for this disk type.");
+        }
     }
 
     private boolean isRepairNeededForHost(boolean hostGroupMode, Set<String> instanceHostNames, HostMetadata hmd) {
@@ -653,8 +676,8 @@ public class ClusterService {
         }
     }
 
-    private void validateRepair(Stack stack, HostMetadata hostMetadata) {
-        if (isGateway(hostMetadata) && !isMultipleGateway(stack)) {
+    private void validateRepair(Stack stack, HostMetadata hostMetadata, boolean repairWithReattach) {
+        if (!repairWithReattach || (isGateway(hostMetadata) && !isMultipleGateway(stack))) {
             throw new BadRequestException("Ambari server failure cannot be repaired with single gateway!");
         }
         if (isGateway(hostMetadata) && withEmbeddedAmbariDB(stack.getCluster())) {
@@ -664,9 +687,9 @@ public class ClusterService {
 
     private void updateNodeVolumeSetsDeleteVolumesFlag(Long stackId, List<String> nodeIds, boolean deleteVolumes) {
         nodeIds.forEach(id -> {
-            List<Resource> volumeSets = resourceRepository.findAllByStackIdAndInstanceIdAndType(stackId, id, ResourceType.AWS_VOLUMESET);
-            volumeSets.forEach(v -> updateDeleteVolumesFlag(deleteVolumes, v));
-            resourceRepository.saveAll(volumeSets);
+            Resource volumeSet = resourceRepository.findByStackIdAndInstanceIdAndType(stackId, id, ResourceType.AWS_VOLUMESET);
+            updateDeleteVolumesFlag(deleteVolumes, volumeSet);
+            resourceRepository.save(volumeSet);
         });
     }
 
