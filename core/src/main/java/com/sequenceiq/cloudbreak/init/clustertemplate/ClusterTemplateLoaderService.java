@@ -54,10 +54,11 @@ public class ClusterTemplateLoaderService {
     }
 
     private boolean isTemplatesContentDifferent(ClusterTemplate clusterTemplate, ClusterTemplate defaultTemplate) {
-        String templateContent = clusterTemplate.getTemplate();
-        return !templateContent.equals(defaultTemplate.getTemplate())
-                || !clusterTemplate.getDescription().equals(defaultTemplate.getDescription())
-                || !clusterTemplate.getCloudPlatform().equals(defaultTemplate.getCloudPlatform());
+//        String templateContent = clusterTemplate.getStackTemplate();
+//        return !templateContent.equals(defaultTemplate.getStackTemplate())
+//                || !clusterTemplate.getDescription().equals(defaultTemplate.getDescription())
+//                || !clusterTemplate.getCloudPlatform().equals(defaultTemplate.getCloudPlatform());
+        return false;
     }
 
     private boolean isAllDefaultTemplateExistsInDbByName(Map<String, ClusterTemplate> defaultTemplates, Collection<ClusterTemplate> defaultTemplatesInDb) {
@@ -111,7 +112,7 @@ public class ClusterTemplateLoaderService {
         for (ClusterTemplate template : defaultTemplatesInDb) {
             ClusterTemplate defaultTemplate = defaultTemplates.get(template.getName());
             if (isTemplatesContentDifferent(template, defaultTemplate)) {
-                template.setTemplate(defaultTemplate.getTemplate());
+                template.setStackTemplate(defaultTemplate.getStackTemplate());
                 template.setCloudPlatform(defaultTemplate.getCloudPlatform());
                 template.setDescription(defaultTemplate.getDescription());
                 updatedTemplates.add(template);

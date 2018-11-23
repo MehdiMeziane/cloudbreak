@@ -9,21 +9,17 @@ import javax.validation.Valid;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v3.ClusterTemplateV3EndPoint;
-import com.sequenceiq.cloudbreak.api.model.stack.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.template.ClusterTemplateRequest;
 import com.sequenceiq.cloudbreak.api.model.template.ClusterTemplateResponse;
-import com.sequenceiq.cloudbreak.api.model.v2.StackFromTemplateRequest;
-import com.sequenceiq.cloudbreak.common.model.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.controller.validation.credential.CredentialValidator;
-import com.sequenceiq.cloudbreak.converter.mapper.ClusterTemplateMapper;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
 import com.sequenceiq.cloudbreak.domain.workspace.User;
-import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.service.RestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
 import com.sequenceiq.cloudbreak.service.template.ClusterTemplateService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.cloudbreak.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.util.WorkspaceEntityType;
 
 @Controller
@@ -32,7 +28,7 @@ import com.sequenceiq.cloudbreak.util.WorkspaceEntityType;
 public class ClusterTemplateV3Controller extends NotificationController implements ClusterTemplateV3EndPoint {
 
     @Inject
-    private ClusterTemplateMapper clusterTemplateMapper;
+    private ConverterUtil converterUtil;
 
     @Inject
     private UserService userService;
@@ -54,33 +50,24 @@ public class ClusterTemplateV3Controller extends NotificationController implemen
 
     @Override
     public ClusterTemplateResponse createInWorkspace(Long workspaceId, @Valid ClusterTemplateRequest request) {
-        credentialValidator.validateCredentialCloudPlatform(request.getCloudPlatform());
-        ClusterTemplate clusterTemplate = clusterTemplateMapper.mapRequestToEntity(request);
+//        credentialValidator.validateCredentialCloudPlatform(request.getCloudPlatform());
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        clusterTemplate = clusterTemplateService.create(clusterTemplate, workspaceId, user);
-        return clusterTemplateMapper.mapEntityToResponse(clusterTemplate);
-    }
-
-    @Override
-    public StackResponse createStackInWorkspaceFromTemplate(Long workspaceId, String name, @Valid StackFromTemplateRequest request) {
-        CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
-        User user = userService.getOrCreate(cloudbreakUser);
-        Workspace workspace = workspaceService.get(workspaceId, user);
-        return stackCommonService.createInWorkspaceFromTemplate(name, request, cloudbreakUser, user, workspace);
+        ClusterTemplate clusterTemplate = clusterTemplateService.create(converterUtil.convert(request, ClusterTemplate.class), workspaceId, user);
+        return converterUtil.convert(clusterTemplate, ClusterTemplateResponse.class);
     }
 
     @Override
     public Set<ClusterTemplateResponse> listByWorkspace(Long workspaceId) {
-        return clusterTemplateMapper.mapEntityToResponse(clusterTemplateService.findAllByWorkspaceId(workspaceId));
+        return converterUtil.convertAllAsSet(clusterTemplateService.findAllByWorkspaceId(workspaceId), ClusterTemplateResponse.class);
     }
 
     @Override
     public ClusterTemplateResponse getByNameInWorkspace(Long workspaceId, String name) {
-        return clusterTemplateMapper.mapEntityToResponse(clusterTemplateService.getByNameForWorkspaceId(name, workspaceId));
+        return converterUtil.convert(clusterTemplateService.getByNameForWorkspaceId(name, workspaceId), ClusterTemplateResponse.class);
     }
 
     @Override
     public void deleteInWorkspace(Long workspaceId, String name) {
-        clusterTemplateService.deleteByNameFromWorkspace(name, workspaceId);
+        clusterTemplateService.delete(name, workspaceId);
     }
 }

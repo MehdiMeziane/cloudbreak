@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
@@ -13,12 +14,21 @@ import com.sequenceiq.cloudbreak.api.model.v2.ClusterV2Request;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.repository.cluster.ClusterRepository;
 
 @Component
 public class ClusterToClusterV2RequestConverter extends AbstractConversionServiceAwareConverter<Cluster, ClusterV2Request> {
 
+    @Autowired
+    private ClusterRepository clusterRepository;
+
     @Override
     public ClusterV2Request convert(Cluster source) {
+        Cluster cluster = clusterRepository.findOneWithLists(source.getId());
+        if (cluster != null) {
+            source = cluster;
+        }
+
         ClusterV2Request clusterV2Request = new ClusterV2Request();
         clusterV2Request.setAmbari(getConversionService().convert(source, AmbariV2Request.class));
         clusterV2Request.setExecutorType(null);

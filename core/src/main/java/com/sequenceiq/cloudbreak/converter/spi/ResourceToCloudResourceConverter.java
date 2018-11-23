@@ -26,8 +26,9 @@ public class ResourceToCloudResourceConverter extends AbstractConversionServiceA
             try {
                 return resource.getAttributes().get(VolumeSetAttributes.class);
             } catch (IOException e) {
-                LOGGER.warn("Failed to convert resource attributes", e);
-                throw new IllegalStateException(e);
+                String message = "Failed to convert resource attributes";
+                LOGGER.warn(message);
+                throw new IllegalStateException(message, e);
             }
         });
 

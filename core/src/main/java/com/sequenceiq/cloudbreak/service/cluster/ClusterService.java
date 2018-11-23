@@ -91,6 +91,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
@@ -269,8 +270,7 @@ public class ClusterService {
             gateWayUtil.generateSignKeys(cluster.getGateway());
             LOGGER.info("Sign key generated in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
 
-            Cluster savedCluster;
-            savedCluster = saveClusterAndComponent(cluster, components, stackName);
+            Cluster savedCluster = saveClusterAndComponent(cluster, components, stackName);
             if (stack.isAvailable()) {
                 flowManager.triggerClusterInstall(stack.getId());
                 InMemoryStateStore.putCluster(savedCluster.getId(), statusToPollGroupConverter.convert(savedCluster.getStatus()));
@@ -292,6 +292,26 @@ public class ClusterService {
             }
             LOGGER.info("Cluster object saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
             clusterComponentConfigProvider.store(components, savedCluster);
+        } catch (DataIntegrityViolationException ex) {
+            String msg = String.format("Error with resource [%s], %s", APIResourceType.CLUSTER, getProperSqlErrorMessage(ex));
+            throw new BadRequestException(msg);
+        }
+        return savedCluster;
+    }
+
+    public Cluster saveWithRef(Cluster cluster) {
+        Cluster savedCluster;
+        try {
+            long start = System.currentTimeMillis();
+            savedCluster = save(cluster);
+            Gateway gateway = cluster.getGateway();
+            if (gateway != null) {
+                gateway.setCluster(savedCluster);
+                gatewayRepository.save(gateway);
+            }
+            List<ClusterComponent> store = clusterComponentConfigProvider.store(cluster.getComponents(), savedCluster);
+            savedCluster.setComponents(new HashSet<>(store));
+            LOGGER.info("Cluster object saved in {} ms with cluster id {}", System.currentTimeMillis() - start, cluster.getId());
         } catch (DataIntegrityViolationException ex) {
             String msg = String.format("Error with resource [%s], %s", APIResourceType.CLUSTER, getProperSqlErrorMessage(ex));
             throw new BadRequestException(msg);
@@ -1316,6 +1336,10 @@ public class ClusterService {
 
     public void triggerMaintenanceModeValidation(Stack stack) {
         flowManager.triggerMaintenanceModeValidationFlow(stack.getId());
+    }
+
+    public void pureDelete(Cluster cluster) {
+        clusterRepository.delete(cluster);
     }
 
     private enum Msg {

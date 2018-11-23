@@ -24,6 +24,10 @@ public class ClusterEntity extends AbstractCloudbreakEntity<ClusterV2Request, Cl
         super(new ClusterV2Request(), testContex);
     }
 
+    public ClusterEntity() {
+        super(ClusterEntity.class.getSimpleName());
+    }
+
     public ClusterEntity valid() {
         return withAmbariRequest(getTestContext().init(AmbariEntity.class));
     }

@@ -10,8 +10,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
 
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.aspect.secret.SecretValue;
@@ -22,7 +20,6 @@ import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name"}))
 public class Template implements ProvisionEntity, WorkspaceAwareResource {
 
     @Id
@@ -30,16 +27,13 @@ public class Template implements ProvisionEntity, WorkspaceAwareResource {
     @SequenceGenerator(name = "template_generator", sequenceName = "template_id_seq", allocationSize = 1)
     private Long id;
 
-    @Column(nullable = false)
     private String name;
 
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String description;
 
-    @Column(nullable = false)
     private String instanceType;
 
-    @Column(nullable = false)
     private Integer volumeCount;
 
     private Integer volumeSize;
@@ -48,14 +42,11 @@ public class Template implements ProvisionEntity, WorkspaceAwareResource {
 
     private String volumeType;
 
-    @Column(nullable = false)
     private boolean deleted;
 
-    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private ResourceStatus status;
 
-    @Column(nullable = false)
     private String cloudPlatform;
 
     @ManyToOne

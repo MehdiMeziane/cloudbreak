@@ -2,7 +2,6 @@ package com.sequenceiq.it.cloudbreak.newway.entity;
 
 import javax.ws.rs.core.Response;
 
-import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
@@ -26,12 +25,17 @@ public class AmbariEntity extends AbstractCloudbreakEntity<AmbariV2Request, Resp
         super(new AmbariV2Request(), testContex);
     }
 
+    public AmbariEntity() {
+        super(AmbariEntity.class.getSimpleName().toUpperCase());
+    }
+
     public AmbariEntity valid() {
         return withUserName("admin")
                 .withPassword("admin1234")
                 .withBlueprintName(MockCloudProvider.BLUEPRINT_DEFAULT_NAME)
                 .withValidateRepositories(true)
-                .withAmbariStackDetails(new AmbariStackDetailsJson());
+                .withAmbariStackDetails(new AmbariStackDetailsJson())
+                .withAmbariRepoDetailsJson(new AmbariRepoDetailsJson());
     }
 
     public AmbariEntity withBlueprintId(Long blueprintId) {
@@ -86,11 +90,6 @@ public class AmbariEntity extends AbstractCloudbreakEntity<AmbariV2Request, Resp
 
     public AmbariEntity withAmbariRepoDetailsJson(AmbariRepoDetailsJson ambariRepoDetailsJson) {
         getRequest().setAmbariRepoDetailsJson(ambariRepoDetailsJson);
-        return this;
-    }
-
-    public AmbariEntity withAmbariDatabaseDetails(AmbariDatabaseDetailsJson ambariDatabaseDetails) {
-        getRequest().setAmbariDatabaseDetails(ambariDatabaseDetails);
         return this;
     }
 

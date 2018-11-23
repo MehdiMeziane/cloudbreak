@@ -39,7 +39,6 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackType;
 import com.sequenceiq.cloudbreak.domain.stack.StackValidation;
@@ -216,7 +215,7 @@ public class StackCreatorService {
                 } catch (CloudbreakImageNotFoundException | IOException | TransactionExecutionException e) {
                     throw new RuntimeException(e.getMessage(), e);
                 }
-                prepareSharedServiceIfNeed(stackRequest, stack, stackName);
+                prepareSharedServiceIfNeed(stackRequest, stack);
                 return stack;
             });
         } catch (TransactionExecutionException e) {
@@ -267,14 +266,14 @@ public class StackCreatorService {
         return clusterRequest.getAmbariRepoDetailsJson() != null || clusterRequest.getAmbariStackDetails() != null;
     }
 
-    private Stack prepareSharedServiceIfNeed(StackRequest stackRequest, Stack stack, String stackName) {
+    private Stack prepareSharedServiceIfNeed(StackRequest stackRequest, Stack stack) {
         if (stackRequest.getClusterRequest() != null && stackRequest.getClusterRequest().getConnectedCluster() != null) {
             long start = System.currentTimeMillis();
             Optional<StackInputs> stackInputs = sharedServiceConfigProvider.prepareDatalakeConfigs(stack.getCluster().getBlueprint(), stack);
             if (stackInputs.isPresent()) {
                 stack = sharedServiceConfigProvider.updateStackinputs(stackInputs.get(), stack);
             }
-            LOGGER.info("Cluster object and its dependencies has been created in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
+            LOGGER.info("Cluster object and its dependencies has been created in {} ms for stack {}", System.currentTimeMillis() - start, stack.getName());
         }
         return stack;
     }
@@ -293,9 +292,8 @@ public class StackCreatorService {
             Workspace workspace) {
         ClusterTemplate clusterTemplate = clusterTemplateService.getByNameForWorkspace(templateName, workspace);
         validateTemplateAndCredentialCloudPlatform(request, workspace, clusterTemplate);
-        try {
-            String template = clusterTemplate.getTemplate();
-            StackV2Request stackV2Request = new Json(template).get(StackV2Request.class);
+//        try {
+            StackV2Request stackV2Request = conversionService.convert(clusterTemplate.getStackTemplate(), StackV2Request.class);
             stackV2Request.setGeneral(request.getGeneral());
             stackV2Request.setStackAuthentication(request.getStackAuthentication());
             if (stackV2Request.getCluster() != null && stackV2Request.getCluster().getAmbari() != null) {
@@ -304,9 +302,9 @@ public class StackCreatorService {
             }
             StackRequest stackRequest = conversionService.convert(stackV2Request, StackRequest.class);
             return createStack(cloudbreakUser, user, workspace, stackRequest);
-        } catch (IOException e) {
-            throw new BadRequestException("Could not load template", e);
-        }
+//        } catch (IOException e) {
+//            throw new BadRequestException("Could not load template", e);
+//        }
     }
 
     private void validateTemplateAndCredentialCloudPlatform(StackFromTemplateRequest request, Workspace workspace, ClusterTemplate clusterTemplate) {

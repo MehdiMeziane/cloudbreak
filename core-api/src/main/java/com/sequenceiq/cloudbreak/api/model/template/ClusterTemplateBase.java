@@ -27,11 +27,10 @@ public abstract class ClusterTemplateBase implements JsonEntity {
 
     @ApiModelProperty(ModelDescriptions.ClusterTemplateModelDescription.TEMPLATE)
     @NotNull
-    private StackV2Request template;
+    private StackV2Request stackTemplate;
 
-    @NotNull
     @ApiModelProperty(ModelDescriptions.ClusterTemplateModelDescription.CLOUD_PLATFORM)
-    private String cloudPlatform;
+    private String datalakeRequired;
 
     public String getName() {
         return name;
@@ -49,19 +48,19 @@ public abstract class ClusterTemplateBase implements JsonEntity {
         this.description = description;
     }
 
-    public StackV2Request getTemplate() {
-        return template;
+    public StackV2Request getStackTemplate() {
+        return stackTemplate;
     }
 
-    public void setTemplate(StackV2Request template) {
-        this.template = template;
+    public void setStackTemplate(StackV2Request stackTemplate) {
+        this.stackTemplate = stackTemplate;
     }
 
-    public String getCloudPlatform() {
-        return cloudPlatform;
+    public String getDatalakeRequired() {
+        return datalakeRequired;
     }
 
-    public void setCloudPlatform(String cloudPlatform) {
-        this.cloudPlatform = cloudPlatform;
+    public void setDatalakeRequired(String datalakeRequired) {
+        this.datalakeRequired = datalakeRequired;
     }
 }

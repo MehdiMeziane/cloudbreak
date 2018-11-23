@@ -22,6 +22,10 @@ public class SecurityGroupEntity extends AbstractCloudbreakEntity<SecurityGroupV
         super(new SecurityGroupV2Request(), testContext);
     }
 
+    public SecurityGroupEntity() {
+        super(SecurityGroupEntity.class.getSimpleName().toUpperCase());
+    }
+
     public SecurityGroupEntity valid() {
         return withSecurityRules(Collections.singletonList(getTestContext().init(SecurityRules.class)));
     }

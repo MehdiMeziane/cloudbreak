@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.repository.cluster;
 
 import static com.sequenceiq.cloudbreak.authorization.WorkspacePermissions.Action.READ;
 
+import java.util.List;
 import java.util.Set;
 
 import javax.transaction.Transactional;
@@ -29,7 +30,13 @@ public interface ClusterTemplateRepository extends WorkspaceResourceRepository<C
     @CheckPermissionsByTarget(action = READ, targetIndex = 0)
     <S extends ClusterTemplate> Iterable<S> saveAll(Iterable<S> entities);
 
-    @Query("SELECT c FROM ClusterTemplate c WHERE c.workspace.id= :workspaceId AND c.status <> 'DEFAULT_DELETED'")
+    @Query("SELECT c FROM ClusterTemplate c LEFT JOIN FETCH c.stackTemplate s LEFT JOIN FETCH s.resources LEFT JOIN FETCH s.instanceGroups ig "
+            + "LEFT JOIN FETCH ig.instanceMetaData WHERE c.workspace.id= :workspaceId AND c.status <> 'DEFAULT_DELETED'")
     @CheckPermissionsByReturnValue
     Set<ClusterTemplate> findAllByNotDeletedInWorkspace(@Param("workspaceId") Long workspaceId);
+
+    @Query("SELECT c FROM ClusterTemplate c LEFT JOIN FETCH c.stackTemplate s LEFT JOIN FETCH s.resources LEFT JOIN FETCH s.instanceGroups ig "
+            + "LEFT JOIN FETCH ig.instanceMetaData WHERE c.workspace.id= :workspaceId AND c.name in :names AND c.status <> 'DEFAULT_DELETED'")
+    @CheckPermissionsByReturnValue
+    List<ClusterTemplate> findAllByNameAndWorkspaceIdWithList(@Param("names") List<String> names, @Param("workspaceId") Long workspaceId);
 }

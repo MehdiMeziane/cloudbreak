@@ -154,7 +154,12 @@ public class TestContext implements ApplicationContextAware {
 
         LOGGER.info("then {} assertion on {}, name: {}", key, entity, entity.getName());
         try {
-            return assertion.doAssertion(this, entity, getCloudbreakClient(who));
+            CloudbreakEntity cloudbreakEntity = resources.get(key);
+            if (cloudbreakEntity != null) {
+                return assertion.doAssertion(this, (T) cloudbreakEntity, getCloudbreakClient(who));
+            } else {
+                assertion.doAssertion(this, entity, getCloudbreakClient(who));
+            }
         } catch (Exception e) {
             if (runningParameter.isLogError()) {
                 LOGGER.error("then [{}] assertion is failed: {}, name: {}", key, e.getMessage(), entity.getName(), e);
@@ -381,8 +386,12 @@ public class TestContext implements ApplicationContextAware {
     public void cleanupTestContextEntity() {
         checkShutdown();
         handleExecptionsDuringTest();
-        if (!cleanUpOnFailure && !exceptionMap.isEmpty()) {
+        if (!cleanUpOnFailure) {
             LOGGER.info("Cleanup skipped beacuse cleanupOnFail is false");
+            return;
+        }
+        if (!exceptionMap.isEmpty()) {
+            LOGGER.info("Cleanup skipped beacuse of previous errors");
             return;
         }
         List<CloudbreakEntity> entities = new ArrayList<>(resources.values());

@@ -70,8 +70,9 @@ public class StackEntity extends AbstractCloudbreakEntity<StackV2Request, StackR
     }
 
     public StackEntity valid() {
+        String randomNameForMock = getNameCreator().getRandomNameForMock();
         return withInputs(emptyMap())
-                .withName(getNameCreator().getRandomNameForMock())
+                .withName(randomNameForMock)
                 .withRegion(getCloudProvider().region())
                 .withAvailabilityZone(getCloudProvider().availabilityZone())
                 .withInstanceGroupsEntity(InstanceGroupEntity.defaultHostGroup(getTestContext()))
@@ -79,7 +80,7 @@ public class StackEntity extends AbstractCloudbreakEntity<StackV2Request, StackR
                 .withCredentialName(getTestContext().get(CredentialEntity.class).getName())
                 .withStackAuthentication(getTestContext().init(StackAuthentication.class))
                 .withGatewayPort(getTestContext().getSparkServer().getPort())
-                .withCluster(getTestContext().init(ClusterEntity.class));
+                .withCluster(getTestContext().init(ClusterEntity.class).withName(randomNameForMock));
     }
 
     public StackEntity withName(String name) {
@@ -276,6 +277,7 @@ public class StackEntity extends AbstractCloudbreakEntity<StackV2Request, StackR
     public List<StackResponse> getAll(CloudbreakClient client) {
         StackV3Endpoint stackV3Endpoint = client.getCloudbreakClient().stackV3Endpoint();
         return stackV3Endpoint.listByWorkspace(client.getWorkspaceId(), null, false).stream()
+                .filter(s -> s.getName() != null)
                 .map(s -> {
                     StackResponse stackResponse = new StackResponse();
                     stackResponse.setName(s.getName());

@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.domain.stack.cluster;
 import java.io.Serializable;
 
 import javax.persistence.Column;
-import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -11,15 +10,14 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
-import com.sequenceiq.cloudbreak.aspect.secret.SecretValue;
 import com.sequenceiq.cloudbreak.authorization.WorkspaceResource;
-import com.sequenceiq.cloudbreak.domain.Secret;
-import com.sequenceiq.cloudbreak.domain.SecretToString;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.workspace.Workspace;
 import com.sequenceiq.cloudbreak.domain.workspace.WorkspaceAwareResource;
 
@@ -38,9 +36,8 @@ public class ClusterTemplate implements WorkspaceAwareResource, Serializable {
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String description;
 
-    @Convert(converter = SecretToString.class)
-    @SecretValue
-    private Secret template = Secret.EMPTY;
+    @OneToOne
+    private Stack stackTemplate;
 
     @ManyToOne
     private Workspace workspace;
@@ -52,12 +49,16 @@ public class ClusterTemplate implements WorkspaceAwareResource, Serializable {
     @Column(nullable = false)
     private String cloudPlatform;
 
-    public String getTemplate() {
-        return template.getRaw();
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private DatalakeRequired datalakeRequired;
+
+    public Stack getStackTemplate() {
+        return stackTemplate;
     }
 
-    public void setTemplate(String template) {
-        this.template = new Secret(template);
+    public void setStackTemplate(Stack stackTemplate) {
+        this.stackTemplate = stackTemplate;
     }
 
     @Override
@@ -115,5 +116,13 @@ public class ClusterTemplate implements WorkspaceAwareResource, Serializable {
 
     public void setCloudPlatform(String cloudPlatform) {
         this.cloudPlatform = cloudPlatform;
+    }
+
+    public DatalakeRequired getDatalakeRequired() {
+        return datalakeRequired;
+    }
+
+    public void setDatalakeRequired(DatalakeRequired datalakeRequired) {
+        this.datalakeRequired = datalakeRequired;
     }
 }

@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.util;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -28,6 +29,12 @@ public class ConverterUtil {
         return list.stream()
                 .map(event -> conversionService.convert(event, clss))
                 .collect(Collectors.toList());
+    }
+
+    public <T> Set<T> convertAllAsSet(Collection<?> list, Class<T> clss) {
+        return list.stream()
+                .map(event -> conversionService.convert(event, clss))
+                .collect(Collectors.toSet());
     }
 
     public <T> T convert(Object object, Class<T> clss) {

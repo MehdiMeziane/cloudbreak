@@ -41,17 +41,14 @@ public class Gateway implements ProvisionEntity {
     @OneToOne
     private Cluster cluster;
 
-    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private GatewayType gatewayType = GatewayType.INDIVIDUAL;
 
-    @Column(nullable = false)
     private String path;
 
     @OneToMany(mappedBy = "gateway", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<GatewayTopology> topologies = new HashSet<>();
 
-    @Column(nullable = false)
     private String topologyName = "";
 
     @Convert(converter = JsonToString.class)
@@ -62,7 +59,6 @@ public class Gateway implements ProvisionEntity {
     @SecretValue
     private Secret knoxMasterSecret = Secret.EMPTY;
 
-    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private SSOType ssoType = SSOType.NONE;
 

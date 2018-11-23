@@ -33,6 +33,10 @@ public class InstanceGroupEntity extends AbstractCloudbreakEntity<InstanceGroupV
         super(new InstanceGroupV2Request(), testContext);
     }
 
+    public InstanceGroupEntity() {
+        super(InstanceGroupEntity.class.getSimpleName().toUpperCase());
+    }
+
     public InstanceGroupEntity valid() {
         HostGroupType hostGroupType = MASTER;
         return withHostGroup(hostGroupType);

@@ -119,7 +119,7 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
     @SecretValue
     private Secret cloudbreakAmbariPassword = Secret.EMPTY;
 
-    @Column(nullable = false)
+    @Column
     private Boolean secure;
 
     @ManyToOne
@@ -294,7 +294,7 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
     }
 
     public boolean isSecure() {
-        return secure == null ? false : secure;
+        return Boolean.TRUE.equals(secure);
     }
 
     public Set<RDSConfig> getRdsConfigs() {

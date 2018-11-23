@@ -6,6 +6,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.ConfigFileApplicationContextInitializer;
 import org.springframework.test.context.ContextConfiguration;
@@ -60,7 +61,7 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
 
     @BeforeSuite
     public void beforeSuite(ITestContext testngContext) {
-
+        MDC.put("suite", "init of " + getClass().getSimpleName());
     }
 
     @BeforeClass
@@ -77,11 +78,10 @@ public abstract class AbstractIntegrationTest extends AbstractTestNGSpringContex
 
     @AfterSuite
     public void afterSuite() {
-
+        MDC.put("suite", "tear down of " + getClass().getSimpleName());
     }
 
     @DataProvider
-
     public Object[][] testContext() {
         return new Object[][]{{applicationContext.getBean(TestContext.class)}};
     }

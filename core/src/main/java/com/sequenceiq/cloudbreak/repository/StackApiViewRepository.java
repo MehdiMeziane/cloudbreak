@@ -30,7 +30,8 @@ public interface StackApiViewRepository extends WorkspaceResourceRepository<Stac
     Optional<StackApiView> findById(@Param("id") Long id);
 
     @CheckPermissionsByWorkspaceId
-    @Query("SELECT s FROM StackApiView s WHERE s.workspace.id= :id AND s.stackStatus.status <> 'DELETE_COMPLETED'")
+    @Query("SELECT s FROM StackApiView s WHERE s.workspace.id= :id AND s.stackStatus.status <> 'DELETE_COMPLETED' "
+            + "AND (s.type is not 'TEMPLATE' OR s.type is null)")
     Set<StackApiView> findByWorkspaceId(@Param("id") Long id);
 
     @CheckPermissionsByWorkspaceId

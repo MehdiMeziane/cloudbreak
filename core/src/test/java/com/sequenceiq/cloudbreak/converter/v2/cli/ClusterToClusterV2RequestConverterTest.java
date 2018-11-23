@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.ProxyConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.repository.cluster.ClusterRepository;
 
 public class ClusterToClusterV2RequestConverterTest {
 
@@ -39,6 +40,9 @@ public class ClusterToClusterV2RequestConverterTest {
 
     @Mock
     private ConversionService conversionService;
+
+    @Mock
+    private ClusterRepository clusterRepository;
 
     @Mock
     private Cluster cluster;
@@ -52,6 +56,7 @@ public class ClusterToClusterV2RequestConverterTest {
     public void testConvertWhenAmbariConversionSuccessfulThenExpectedAmbariV2RequestShouldPlacedIn() {
         AmbariV2Request expected = mock(AmbariV2Request.class);
         when(conversionService.convert(cluster, AmbariV2Request.class)).thenReturn(expected);
+        when(clusterRepository.findOneWithLists(any(Long.class))).thenReturn(cluster);
 
         ClusterV2Request result = underTest.convert(cluster);
         assertEquals(expected, result.getAmbari());
@@ -59,6 +64,8 @@ public class ClusterToClusterV2RequestConverterTest {
 
     @Test
     public void testConvertSettingExecutorTypeToNull() {
+        when(clusterRepository.findOneWithLists(any(Long.class))).thenReturn(cluster);
+
         ClusterV2Request result = underTest.convert(cluster);
 
         assertNull(result.getExecutorType());
@@ -67,6 +74,7 @@ public class ClusterToClusterV2RequestConverterTest {
     @Test
     public void testConvertWhenThereIsNoFileSystemThenCloudStorageIsNull() {
         when(cluster.getFileSystem()).thenReturn(null);
+        when(clusterRepository.findOneWithLists(any(Long.class))).thenReturn(cluster);
 
         ClusterV2Request result = underTest.convert(cluster);
 
@@ -81,6 +89,7 @@ public class ClusterToClusterV2RequestConverterTest {
         CloudStorageRequest expected = new CloudStorageRequest();
         when(cluster.getFileSystem()).thenReturn(fileSystem);
         when(conversionService.convert(fileSystem, CloudStorageRequest.class)).thenReturn(expected);
+        when(clusterRepository.findOneWithLists(any(Long.class))).thenReturn(cluster);
 
         ClusterV2Request result = underTest.convert(cluster);
 
@@ -91,6 +100,7 @@ public class ClusterToClusterV2RequestConverterTest {
     @Test
     public void testConvertWhenLdapConfigIsNullThenLdapConfigNameShouldBeNull() {
         when(cluster.getLdapConfig()).thenReturn(null);
+        when(clusterRepository.findOneWithLists(any(Long.class))).thenReturn(cluster);
 
         ClusterV2Request result = underTest.convert(cluster);
 
@@ -103,6 +113,7 @@ public class ClusterToClusterV2RequestConverterTest {
         LdapConfig ldapConfig = mock(LdapConfig.class);
         when(cluster.getLdapConfig()).thenReturn(ldapConfig);
         when(ldapConfig.getName()).thenReturn(expected);
+        when(clusterRepository.findOneWithLists(any(Long.class))).thenReturn(cluster);
 
         ClusterV2Request result = underTest.convert(cluster);
 
@@ -113,6 +124,7 @@ public class ClusterToClusterV2RequestConverterTest {
     public void testConvertNameIsPassedProperly() {
         String expected = "name";
         when(cluster.getName()).thenReturn(expected);
+        when(clusterRepository.findOneWithLists(any(Long.class))).thenReturn(cluster);
 
         ClusterV2Request result = underTest.convert(cluster);
 
@@ -122,6 +134,7 @@ public class ClusterToClusterV2RequestConverterTest {
     @Test
     public void testConvertWhenProxyConfigIsNullThenProxyNameShouldBeNull() {
         when(cluster.getProxyConfig()).thenReturn(null);
+        when(clusterRepository.findOneWithLists(any(Long.class))).thenReturn(cluster);
 
         ClusterV2Request result = underTest.convert(cluster);
 
@@ -134,6 +147,7 @@ public class ClusterToClusterV2RequestConverterTest {
         ProxyConfig proxyConfig = mock(ProxyConfig.class);
         when(proxyConfig.getName()).thenReturn(expected);
         when(cluster.getProxyConfig()).thenReturn(proxyConfig);
+        when(clusterRepository.findOneWithLists(any(Long.class))).thenReturn(cluster);
 
         ClusterV2Request result = underTest.convert(cluster);
 
@@ -143,6 +157,7 @@ public class ClusterToClusterV2RequestConverterTest {
     @Test
     public void testConvertWhenRdsConfigNullThenRdsConfigNamesShouldBeEmpty() {
         when(cluster.getRdsConfigs()).thenReturn(null);
+        when(clusterRepository.findOneWithLists(any(Long.class))).thenReturn(cluster);
 
         ClusterV2Request result = underTest.convert(cluster);
 
@@ -152,6 +167,7 @@ public class ClusterToClusterV2RequestConverterTest {
     @Test
     public void testConvertWhenRdsConfigIsNotNullButItsEmptyThenRdsConfigNamesShouldBeEmpty() {
         when(cluster.getRdsConfigs()).thenReturn(Collections.emptySet());
+        when(clusterRepository.findOneWithLists(any(Long.class))).thenReturn(cluster);
 
         ClusterV2Request result = underTest.convert(cluster);
 
@@ -173,6 +189,7 @@ public class ClusterToClusterV2RequestConverterTest {
         rdsConfigs.add(userManaged);
 
         when(cluster.getRdsConfigs()).thenReturn(rdsConfigs);
+        when(clusterRepository.findOneWithLists(any(Long.class))).thenReturn(cluster);
 
         ClusterV2Request result = underTest.convert(cluster);
 

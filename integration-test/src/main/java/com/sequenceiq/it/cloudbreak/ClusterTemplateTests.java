@@ -72,9 +72,9 @@ public class ClusterTemplateTests extends CloudbreakTest {
         given(CloudbreakClient.created());
         given(ClusterTemplate.request()
                 .withName(VALID_CT_NAME)
-                .withDescription(CT_DESCRIPTION)
-                .withCloudPlatform(cloudProvider.getPlatform())
-                .withClusterTemplateJSON(getClusterTemplateFile()), VALID_CT_NAME + " cluster template request.");
+                .withDescription(CT_DESCRIPTION));
+//                .withDatalakeRequired(cloudProvider.getPlatform())
+//                .withClusterTemplateJSON(getClusterTemplateFile()), VALID_CT_NAME + " cluster template request.");
         when(ClusterTemplate.post(), VALID_CT_NAME + " cluster template request has been posted.");
         then(ClusterTemplate.assertThis(
                 (clusterTemplate, t) -> Assert.assertEquals(clusterTemplate.getResponse().getName(), VALID_CT_NAME)),
@@ -89,9 +89,9 @@ public class ClusterTemplateTests extends CloudbreakTest {
         given(CloudbreakClient.created());
         given(ClusterTemplate.request()
                 .withName(templateName)
-                .withDescription(CT_DESCRIPTION)
-                .withCloudPlatform(cloudProvider.getPlatform())
-                .withClusterTemplateJSON(getClusterTemplateFile()), templateName + " cluster template request.");
+                .withDescription(CT_DESCRIPTION));
+//                .withDatalakeRequired(cloudProvider.getPlatform())
+//                .withClusterTemplateJSON(getClusterTemplateFile()), templateName + " cluster template request.");
         when(ClusterTemplate.post(), templateName + " cluster template name request has been posted.");
     }
 
@@ -102,9 +102,9 @@ public class ClusterTemplateTests extends CloudbreakTest {
                 .withName(AGAIN_CT_NAME), AGAIN_CT_NAME + " cluster template is created.");
         given(ClusterTemplate.request()
                 .withName(AGAIN_CT_NAME)
-                .withDescription(CT_DESCRIPTION)
-                .withCloudPlatform(cloudProvider.getPlatform())
-                .withClusterTemplateJSON(getClusterTemplateFile()), AGAIN_CT_NAME + " cluster template request.");
+                .withDescription(CT_DESCRIPTION));
+//                .withDatalakeRequired(cloudProvider.getPlatform())
+//                .withClusterTemplateJSON(getClusterTemplateFile()), AGAIN_CT_NAME + " cluster template request.");
         when(ClusterTemplate.post(), AGAIN_CT_NAME + " cluster template request has been posted.");
     }
 
@@ -116,8 +116,8 @@ public class ClusterTemplateTests extends CloudbreakTest {
         given(ClusterTemplate.request()
                 .withName(LONG_DC_CT_NAME)
                 .withDescription(invalidLongDescripton)
-                .withCloudPlatform(cloudProvider.getPlatform())
-                .withClusterTemplateJSON(getClusterTemplateFile()), LONG_DC_CT_NAME + " cluster template request.");
+                .withDatalakeRequired(cloudProvider.getPlatform()));
+//                .withClusterTemplateJSON(getClusterTemplateFile()), LONG_DC_CT_NAME + " cluster template request.");
         when(ClusterTemplate.post(), LONG_DC_CT_NAME + " cluster template description request has been posted.");
     }
 
@@ -127,9 +127,9 @@ public class ClusterTemplateTests extends CloudbreakTest {
         given(CloudbreakClient.created());
         given(ClusterTemplate.request()
                 .withName(EMPTY_CT_NAME)
-                .withDescription(CT_DESCRIPTION)
-                .withCloudPlatform(cloudProvider.getPlatform())
-                .withClusterTemplateJSON(getEmptyClusterTemplateFile()), EMPTY_CT_NAME + " cluster template with no content request.");
+                .withDescription(CT_DESCRIPTION));
+//                .withDatalakeRequired(cloudProvider.getPlatform())
+//                .withClusterTemplateJSON(getEmptyClusterTemplateFile()), EMPTY_CT_NAME + " cluster template with no content request.");
         when(ClusterTemplate.post(), EMPTY_CT_NAME + " cluster template with no content request has been posted.");
     }
 

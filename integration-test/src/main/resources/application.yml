@@ -129,7 +129,7 @@ integrationtest:
 
     cleanup:
         retryCount: 3
-        cleanupBeforeStart: false
+        cleanupBeforeStart: true
 
     defaultBlueprintName:
 

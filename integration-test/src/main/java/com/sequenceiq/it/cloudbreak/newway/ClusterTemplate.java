@@ -1,10 +1,9 @@
 package com.sequenceiq.it.cloudbreak.newway;
 
-import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
-import com.sequenceiq.it.IntegrationTestContext;
-
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+
+import com.sequenceiq.it.IntegrationTestContext;
 
 public class ClusterTemplate extends ClusterTemplateEntity {
 
@@ -69,12 +68,7 @@ public class ClusterTemplate extends ClusterTemplateEntity {
     }
 
     @Override
-    public ClusterTemplate withCloudPlatform(String cloudPlatform) {
-        return (ClusterTemplate) super.withCloudPlatform(cloudPlatform);
-    }
-
-    @Override
-    public ClusterTemplate withClusterTemplate(StackV2Request clusterTemplate) {
-        return (ClusterTemplate) super.withClusterTemplate(clusterTemplate);
+    public ClusterTemplate withDatalakeRequired(String datalakeRequired) {
+        return (ClusterTemplate) super.withDatalakeRequired(datalakeRequired);
     }
 }

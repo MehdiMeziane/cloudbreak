@@ -17,9 +17,9 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.model.template.ClusterTemplateRequest;
-import com.sequenceiq.cloudbreak.converter.mapper.ClusterTemplateMapper;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
+import com.sequenceiq.cloudbreak.util.ConverterUtil;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @Service
@@ -33,7 +33,7 @@ public class DefaultClusterTemplateCache {
     private List<String> clusterTemplates;
 
     @Inject
-    private ClusterTemplateMapper clusterTemplateMapper;
+    private ConverterUtil converterUtil;
 
     @PostConstruct
     public void loadClusterTemplatesFromFile() {
@@ -43,7 +43,7 @@ public class DefaultClusterTemplateCache {
                 try {
                     String templateAsString = FileReaderUtils.readFileFromClasspath("defaults/clustertemplates/" + clusterTemplateName + ".json");
                     ClusterTemplateRequest clusterTemplateRequest = new Json(templateAsString).get(ClusterTemplateRequest.class);
-                    ClusterTemplate clusterTemplate = clusterTemplateMapper.mapRequestToEntity(clusterTemplateRequest);
+                    ClusterTemplate clusterTemplate = converterUtil.convert(clusterTemplateRequest, ClusterTemplate.class);
                     clusterTemplate.setStatus(ResourceStatus.DEFAULT);
                     defaultClusterTemplates.put(clusterTemplate.getName(), clusterTemplate);
                 } catch (IOException e) {
