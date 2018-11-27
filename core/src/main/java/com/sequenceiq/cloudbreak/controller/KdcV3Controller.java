@@ -47,7 +47,7 @@ public class KdcV3Controller extends NotificationController implements KdcV3Endp
     @Override
     public KerberosResponse createInWorkspace(Long workspaceId, @Valid KerberosRequest request) {
         KerberosConfig newKdcConfig = conversionService.convert(request, KerberosConfig.class);
-        KerberosConfig createdKdcConfig = kdcService.createInEnvironment(newKdcConfig, null, workspaceId);
+        KerberosConfig createdKdcConfig = kdcService.createForLoggedInUser(newKdcConfig, workspaceId);
         return conversionService.convert(createdKdcConfig, KerberosResponse.class);
     }
 
